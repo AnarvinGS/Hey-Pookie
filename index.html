@@ -1,0 +1,920 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, maximum-scale=1">
+<title>Late Night Session — A Proposal</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,500;0,9..144,600;0,9..144,700;1,9..144,400;1,9..144,500;1,9..144,600&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+
+  /* ============ TOKENS ============ */
+  :root{
+    --ink:        #201019;
+    --wine:       #3a1830;
+    --wine-2:     #4d1f39;
+    --rose:       #f6c9d2;
+    --rose-dim:   #d9a6b3;
+    --gold:       #edaa4a;
+    --gold-2:     #f6c56d;
+    --paper:      #faf1e2;
+    --paper-2:    #f3e6cf;
+    --cocoa:      #4a2f27;
+    --cocoa-soft: #7a5648;
+    --line:       rgba(246,201,210,0.22);
+
+    --display: 'Fraunces', 'Iowan Old Style', Georgia, serif;
+    --body:    'Manrope', -apple-system, 'Segoe UI', sans-serif;
+
+    --safe-top: env(safe-area-inset-top, 0px);
+    --safe-bottom: env(safe-area-inset-bottom, 0px);
+  }
+
+  *{ box-sizing:border-box; -webkit-tap-highlight-color: transparent; }
+  html,body{
+    margin:0; padding:0; height:100%;
+    background: var(--ink);
+    font-family: var(--body);
+    color: var(--rose);
+    overflow:hidden;
+  }
+  body{
+    min-height: 100dvh;
+    background:
+      radial-gradient(60% 50% at 20% 8%, rgba(246,197,109,0.10) 0%, rgba(246,197,109,0) 60%),
+      radial-gradient(70% 60% at 85% 90%, rgba(246,201,210,0.10) 0%, rgba(246,201,210,0) 60%),
+      linear-gradient(160deg, var(--ink) 0%, var(--wine) 55%, var(--wine-2) 100%);
+    position:relative;
+  }
+
+  body::before{
+    content:"";
+    position:fixed; inset:0;
+    pointer-events:none;
+    opacity:0.05;
+    background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='120' height='120'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/></filter><rect width='100%25' height='100%25' filter='url(%23n)'/></svg>");
+    mix-blend-mode: overlay;
+    z-index: 1;
+  }
+
+  h1,h2,h3,.display{ font-family: var(--display); font-weight:600; margin:0; }
+
+  button{ font-family: var(--body); border:none; cursor:pointer; background:none; color:inherit; }
+  a{ color:inherit; }
+
+  button:focus-visible, a:focus-visible{
+    outline: 2px solid var(--gold-2);
+    outline-offset: 3px;
+    border-radius: 6px;
+  }
+
+  /* ============ APP SHELL ============ */
+  #app{
+    position:relative;
+    width:100%;
+    height:100dvh;
+    z-index: 2;
+  }
+
+  .screen{
+    position:absolute; inset:0;
+    display:flex; flex-direction:column; align-items:center; justify-content:center;
+    padding: calc(28px + var(--safe-top)) 24px calc(28px + var(--safe-bottom));
+    opacity:0; visibility:hidden; pointer-events:none;
+    transform: translateY(14px);
+    transition: opacity .5s ease, transform .5s ease;
+  }
+  .screen.active{
+    opacity:1; visibility:visible; pointer-events:auto;
+    transform: translateY(0);
+  }
+
+  .track{
+    position:absolute; top: calc(18px + var(--safe-top)); left:0; right:0;
+    display:flex; align-items:center; justify-content:center; gap:10px;
+    font-family: var(--body); font-weight:700; font-size:11px;
+    letter-spacing:.16em; text-transform:uppercase;
+    color: var(--rose-dim);
+    opacity:.75;
+  }
+  .track .dot{ width:4px; height:4px; border-radius:50%; background: var(--gold); }
+
+  /* ============ SCREEN 1 — PROPOSAL ============ */
+  #screen-proposal{ text-align:center; }
+  
+  .recipient-header{
+    font-size: clamp(12px, 3.5vw, 15px);
+    letter-spacing: .2em;
+    text-transform: uppercase;
+    color: var(--gold-2);
+    font-weight: 800;
+    margin-bottom: 12px;
+  }
+
+  .proposal-title{
+    font-size: clamp(28px, 8vw, 46px);
+    line-height:1.18;
+    color: var(--paper);
+    max-width: 480px;
+    margin: 0 auto 6px;
+  }
+  .proposal-title em{ font-style:italic; color: var(--gold-2); }
+  .proposal-sub{
+    font-size: clamp(28px, 8.5vw, 48px);
+    margin: 4px 0 32px;
+    color: var(--rose);
+  }
+
+  /* Button Area layout */
+  .btn-field{
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 16px;
+    width: 100%;
+    max-width: 400px;
+    margin: 0 auto;
+    min-height: 140px;
+  }
+
+  .btn-yes{
+    position:relative;
+    z-index:5;
+    display:inline-flex; align-items:center; gap:10px;
+    padding: 18px 40px;
+    border-radius: 999px;
+    background: linear-gradient(135deg, var(--gold-2), var(--gold));
+    color: #2c1608;
+    font-weight:800; font-size: 18px;
+    letter-spacing: .01em;
+    box-shadow: 0 12px 30px rgba(237,170,74,0.35), inset 0 1px 0 rgba(255,255,255,0.4);
+    transition: transform .18s ease, box-shadow .18s ease;
+  }
+  .btn-yes:hover{ transform: translateY(-2px) scale(1.03); box-shadow: 0 16px 36px rgba(237,170,74,0.45); }
+  .btn-yes:active{ transform: translateY(0) scale(0.98); }
+
+  .btn-no{
+    position:fixed;
+    z-index:4;
+    padding: 14px 26px;
+    border-radius: 999px;
+    background: rgba(246,201,210,0.08);
+    border: 1px solid rgba(246,201,210,0.35);
+    color: var(--rose);
+    font-weight:600; font-size:15px;
+    white-space:normal;
+    width:max-content;
+    max-width: calc(100vw - 32px);
+    text-align:center;
+    left: var(--no-left, 50%);
+    top: var(--no-top, calc(50% + 140px));
+    transform: translate(-50%, -50%);
+    transition: background .2s ease;
+  }
+  .btn-no:hover{ background: rgba(246,201,210,0.14); }
+
+  /* ============ SCREEN 2 — CELEBRATION ============ */
+  #screen-celebrate{ text-align:center; }
+  .celebrate-title{
+    font-size: clamp(34px, 10vw, 58px);
+    color: var(--paper);
+    margin-bottom: 10px;
+  }
+  .celebrate-sub{
+    font-size: 15px; color: var(--rose-dim); margin-bottom: 46px;
+    font-weight: 500;
+  }
+  canvas#confetti{
+    position:fixed; inset:0; pointer-events:none; z-index: 1;
+  }
+
+  /* ============ SCREEN 3 — SURPRISE ============ */
+  #screen-surprise{ text-align:center; }
+  .gift{
+    font-size: 64px;
+    margin-bottom: 22px;
+    animation: float 3.4s ease-in-out infinite;
+  }
+  @keyframes float{
+    0%,100%{ transform: translateY(0) rotate(-2deg); }
+    50%{ transform: translateY(-10px) rotate(2deg); }
+  }
+  .surprise-title{
+    font-size: clamp(22px, 6vw, 30px);
+    color: var(--paper);
+    margin-bottom: 34px;
+    max-width: 360px;
+  }
+
+  .btn-pill{
+    display:inline-flex; align-items:center; gap:10px;
+    padding: 16px 34px;
+    border-radius: 999px;
+    background: linear-gradient(135deg, var(--gold-2), var(--gold));
+    color: #2c1608;
+    font-weight:800; font-size:15px;
+    letter-spacing:.02em;
+    box-shadow: 0 10px 26px rgba(237,170,74,0.3);
+    transition: transform .18s ease, box-shadow .18s ease;
+  }
+  .btn-pill:hover{ transform: translateY(-2px); box-shadow: 0 14px 30px rgba(237,170,74,0.4); }
+  .btn-pill:active{ transform: translateY(0); }
+
+  /* ============ SCREEN 4 — CARD ============ */
+  #screen-card{ padding-left:0; padding-right:0; }
+
+  .envelope-wrap{
+    display:flex; flex-direction:column; align-items:center; text-align:center;
+  }
+  .envelope{
+    width: 220px; height: 150px;
+    position:relative;
+    cursor:pointer;
+    filter: drop-shadow(0 18px 30px rgba(0,0,0,0.35));
+  }
+  .envelope .body{
+    position:absolute; inset:0;
+    background: linear-gradient(160deg, var(--paper-2), var(--paper));
+    border-radius: 6px;
+  }
+  .envelope .flap{
+    position:absolute; top:0; left:0; right:0; height:78px;
+    background: linear-gradient(160deg, var(--rose), var(--rose-dim));
+    clip-path: polygon(0 0, 100% 0, 50% 68%);
+    border-radius: 6px 6px 0 0;
+    transform-origin: top center;
+    transition: transform .5s cubic-bezier(.6,-0.2,.3,1.3);
+  }
+  .envelope .seal{
+    position:absolute; top: 46px; left:50%; transform:translateX(-50%);
+    width:30px; height:30px; border-radius:50%;
+    background: radial-gradient(circle at 35% 30%, var(--gold-2), var(--gold) 70%);
+    display:flex; align-items:center; justify-content:center;
+    font-size:14px; color:#2c1608; box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+  }
+  .envelope.open .flap{ transform: rotateX(180deg); }
+
+  .tap-hint{
+    margin-top: 20px; font-size:13px; color: var(--rose-dim);
+    letter-spacing: .04em;
+  }
+
+  .card-panel{
+    width:100%; max-width: 560px; height: 100%;
+    display:none;
+    flex-direction:column;
+    opacity:0; transform: translateY(24px) scale(0.98);
+    transition: opacity .55s ease, transform .55s ease;
+    pointer-events:none;
+  }
+  .card-panel.shown{ opacity:1; transform:none; pointer-events:auto; }
+
+  .card-scroll{
+    flex:1;
+    min-height:0;
+    overflow-y:auto;
+    -webkit-overflow-scrolling: touch;
+    background: linear-gradient(180deg, var(--paper) 0%, var(--paper-2) 100%);
+    border-radius: 18px;
+    padding: 34px 26px 30px;
+    box-shadow: 0 30px 60px rgba(0,0,0,0.4), inset 0 0 0 1px rgba(74,47,39,0.06);
+    color: var(--cocoa);
+  }
+  .card-scroll::-webkit-scrollbar{ width:6px; }
+  .card-scroll::-webkit-scrollbar-thumb{ background: rgba(74,47,39,0.25); border-radius:3px; }
+
+  .letter-heading{
+    text-align:center; font-size:11px; letter-spacing:.2em; text-transform:uppercase;
+    color: var(--cocoa-soft); margin-bottom: 26px; font-weight:700;
+  }
+  .letter p{
+    font-family: var(--display);
+    font-size: 16.5px;
+    line-height:1.78;
+    margin: 0 0 16px;
+    color: var(--cocoa);
+    font-weight: 400;
+  }
+  .letter p.pull{
+    text-align:center;
+    font-style:italic;
+    color: var(--cocoa-soft);
+    font-size: 17px;
+    margin: 22px 0;
+  }
+  .letter p.dropcap:first-letter{
+    font-size: 40px;
+    font-weight:700;
+    float:left;
+    line-height:.8;
+    padding-right:6px; padding-top:4px;
+    color: var(--gold);
+  }
+  .letter .divider{
+    text-align:center; color: var(--cocoa-soft); opacity:.5;
+    letter-spacing:.6em; font-size:11px; margin: 22px 0;
+  }
+  .signoff{
+    text-align:right; font-style:italic; margin-top: 6px !important;
+  }
+
+  .continue-block{
+    text-align:center;
+    margin-top: 30px;
+    padding-top: 22px;
+    border-top: 1px dashed rgba(74,47,39,0.2);
+    opacity:0; transform: translateY(10px);
+    transition: opacity .6s ease, transform .6s ease;
+  }
+  .continue-block.visible{ opacity:1; transform:none; }
+  .continue-block p{
+    font-family: var(--body); color: var(--cocoa-soft); font-size:14px;
+    margin: 0 0 16px; font-weight:600;
+  }
+  .btn-continue{
+    display:inline-flex; align-items:center; gap:8px;
+    padding: 14px 30px; border-radius: 999px;
+    background: var(--cocoa);
+    color: var(--paper);
+    font-weight:700; font-size:14px;
+    box-shadow: 0 10px 22px rgba(74,47,39,0.3);
+    transition: transform .18s ease;
+  }
+  .btn-continue:hover{ transform: translateY(-2px); }
+
+  /* ============ SCREEN 5 — DATE DETAILS ============ */
+  #screen-details{ overflow-y:auto; }
+  .details-inner{
+    width:100%; max-width: 480px;
+    text-align:center;
+  }
+  .details-title{
+    font-size: clamp(24px, 7vw, 32px);
+    color: var(--paper);
+    margin-bottom: 8px;
+  }
+  .details-name{
+    font-size:13px; color: var(--gold-2); font-weight:700;
+    letter-spacing:.1em; margin-bottom: 34px;
+  }
+
+  .detail-grid{
+    display:grid; gap: 14px;
+    text-align:left;
+    margin-bottom: 30px;
+  }
+  .detail-row{
+    background: rgba(246,201,210,0.06);
+    border: 1px solid var(--line);
+    border-radius: 14px;
+    padding: 14px 18px;
+    display:flex; align-items:center; gap:14px;
+  }
+  .detail-row .ic{ font-size:20px; width:28px; text-align:center; flex-shrink:0; }
+  .detail-row .label{
+    font-size:10px; letter-spacing:.14em; text-transform:uppercase;
+    color: var(--rose-dim); font-weight:700; margin-bottom:3px;
+  }
+  .detail-row .value{ font-family: var(--display); font-size:17px; color: var(--paper); }
+
+  .footer-note{
+    background: rgba(237,170,74,0.08);
+    border: 1px solid rgba(237,170,74,0.25);
+    border-radius: 14px;
+    padding: 18px 20px;
+    margin-bottom: 30px;
+    text-align:left;
+  }
+  .footer-note .label{
+    font-size:10px; letter-spacing:.14em; text-transform:uppercase;
+    color: var(--gold-2); font-weight:700; margin-bottom:8px;
+  }
+  .footer-note ul{ margin:0; padding-left: 18px; }
+  .footer-note li{
+    font-family: var(--display); font-size:15.5px; color: var(--rose);
+    line-height:1.6;
+  }
+
+  .location-cta{ margin-bottom: 6px; }
+  .location-confirm{
+    margin-top:14px; font-size:12.5px; color: var(--rose-dim);
+    opacity:0; transition: opacity .4s ease;
+  }
+  .location-confirm.visible{ opacity:1; }
+
+  @media (max-width:380px){
+    .btn-yes{ padding:16px 32px; font-size:16px; }
+  }
+
+  @media (min-width: 720px){
+    .letter p{ font-size: 17.5px; }
+  }
+
+  @media (prefers-reduced-motion: reduce){
+    *{ animation-duration: 0.001ms !important; animation-iteration-count: 1 !important; transition-duration: 0.15s !important; }
+  }
+</style>
+</head>
+<body>
+
+<canvas id="confetti" aria-hidden="true"></canvas>
+
+<div id="app">
+
+  <!-- SCREEN 1 : PROPOSAL -->
+  <section class="screen active" id="screen-proposal" aria-live="polite">
+    <div class="track" id="track-label"><span>Track 01</span><span class="dot"></span><span>The Proposal</span></div>
+    
+    <div class="recipient-header">TO: LATE NIGHT WHITNEY HOUSTON</div>
+    <h1 class="proposal-title">So<em>&hellip;</em></h1>
+    <h2 class="proposal-sub">Will you be my date?</h2>
+
+    <div class="btn-field" id="btn-field">
+      <button class="btn-yes" id="btn-yes" type="button">YES <span aria-hidden="true">&#10084;&#65039;</span></button>
+      <button class="btn-no" id="btn-no" type="button">NO &#128532;</button>
+    </div>
+  </section>
+
+  <!-- SCREEN 2 : CELEBRATION -->
+  <section class="screen" id="screen-celebrate">
+    <div class="track"><span>Track 02</span><span class="dot"></span><span>It's Official</span></div>
+    <h1 class="celebrate-title">IT'S A DATE. <span aria-hidden="true">&#127881;&#10084;&#65039;</span></h1>
+    <p class="celebrate-sub">I knew you'd come around. <span aria-hidden="true">&#128524;</span></p>
+    <button class="btn-pill" id="btn-to-surprise" type="button">SURPRISE <span aria-hidden="true">&#127873;</span></button>
+  </section>
+
+  <!-- SCREEN 3 : SURPRISE -->
+  <section class="screen" id="screen-surprise">
+    <div class="track"><span>Track 03</span><span class="dot"></span><span>One More Thing</span></div>
+    <div class="gift" aria-hidden="true">&#127873;</div>
+    <p class="surprise-title">I have one more thing for you.</p>
+    <button class="btn-pill" id="btn-open-surprise" type="button">OPEN SURPRISE</button>
+  </section>
+
+  <!-- SCREEN 4 : CARD -->
+  <section class="screen" id="screen-card">
+    <div class="track"><span>Track 04</span><span class="dot"></span><span>Read This</span></div>
+
+    <div class="envelope-wrap" id="envelope-wrap">
+      <button class="envelope" id="envelope" type="button" aria-label="Open the card">
+        <div class="body"></div>
+        <div class="flap"></div>
+        <div class="seal" aria-hidden="true">&#10084;&#65039;</div>
+      </button>
+      <p class="tap-hint">tap to open</p>
+    </div>
+
+    <div class="card-panel" id="card-panel">
+      <div class="card-scroll" id="card-scroll">
+        <p class="letter-heading">A small, unserious thing</p>
+        <div class="letter">
+
+          <p class="dropcap">Somewhere along the way, you became my favourite person to be completely unserious with.</p>
+
+          <p>I don't know when exactly it happened&mdash;somewhere between yello and blue, your increasingly exhausted eye rolls, and my apparently incurable need to ruffle your feathers just enough to make you laugh. You call me annoying, I insist it is a privilege reserved for very few people, and somehow we keep returning to the same ridiculous conversations as though neither of us has anything better to do.</p>
+
+          <p class="pull">Maybe that's the point.</p>
+
+          <p class="pull">With you, even doing absolutely nothing feels like something.</p>
+
+          <p>Then there are the ordinary things. The random pictures, the funny cars, the &ldquo;look at this&rdquo; messages, the calls that begin nowhere and somehow become two hours long. A good lunch. Something my boss said. A song that suddenly sounds like you.</p>
+
+          <p class="pull">Somehow, you're the first person I want to tell.</p>
+
+          <p class="pull">And then there is the shilling.</p>
+
+          <p>I think I owe that little coin an apology.</p>
+
+          <p>It was never meant to become important. Just the smallest difference between forty-nine and fifty, barely enough to notice. And yet somehow it became a joke, then a little argument, then a ridiculous excuse to tell you that you're the one I want.</p>
+
+          <div class="divider">&#8226; &#8226; &#8226;</div>
+
+          <p class="pull">Funny how these things happen with you.</p>
+
+          <p class="pull">Nothing announces itself.</p>
+
+          <p>A missing shilling becomes a reason to smile. Githeri becomes an invitation. A two-hour conversation begins with nothing and ends with me wondering how the night disappeared so quickly.</p>
+
+          <p class="pull">Perhaps that's what you do to ordinary things.<br>You make them worth remembering.</p>
+
+          <p class="dropcap">I think the hoodie has been getting ideas too.</p>
+
+          <p>It started innocently enough&mdash;a joke about closet space, one ridiculous piece of clothing pretending it had already earned residency. Now it sits there, imaginary and entirely too confident, as though it knows something I don't.</p>
+
+          <p class="pull">Perhaps it does.</p>
+
+          <p>Because there is something strange about imagining a little piece of myself among your things. Not because it has to mean anything yet, but because for a moment I can picture the ordinary version of us&mdash;mornings, misplaced things, food shared without keeping score, you telling me I'm annoying while making space for me anyway.</p>
+
+          <div class="divider">&#8226; &#8226; &#8226;</div>
+
+          <p>And maybe that's why I laughed when you said three months.</p>
+
+          <p class="pull">You were talking about a hoodie.</p>
+
+          <p class="pull">I was already wondering how much room there might be for a life.</p>
+
+          <p class="pull">And perhaps that's what I like most.</p>
+
+          <p>Not the grand things, but the quiet ones&mdash;the laughter that lingers after a call, the ridiculous arguments over nothing, the githeri, the missing shilling, the imaginary space for a hoodie.</p>
+
+          <p class="pull">The way happiness with you doesn't arrive making an entrance.<br>It simply sits beside me and feels like home.</p>
+
+          <p>I don't know exactly what tomorrow makes of any of this. And for once, I don't think I need to.</p>
+
+          <p>I just know that somewhere between the teasing and the tenderness, I found something I don't want to edit, hurry, or overthink.</p>
+
+          <p class="signoff">I rather like being here with you.</p>
+
+          <div class="continue-block" id="continue-block">
+            <p>Ready for the important part?</p>
+            <button class="btn-continue" id="btn-continue" type="button">CONTINUE &#8594;</button>
+          </div>
+
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- SCREEN 5 : DATE DETAILS -->
+  <section class="screen" id="screen-details">
+    <div class="track"><span>Track 05</span><span class="dot"></span><span>The Details</span></div>
+    <div class="details-inner">
+      <h1 class="details-title">Your Date Details <span aria-hidden="true">&#10084;&#65039;</span></h1>
+      <p class="details-name">For Late Night Whitney Houston</p>
+
+      <div class="detail-grid">
+        <div class="detail-row">
+          <div class="ic" aria-hidden="true">&#128198;</div>
+          <div><div class="label">Date</div><div class="value" id="detail-date">29 August 2026</div></div>
+        </div>
+        <div class="detail-row">
+          <div class="ic" aria-hidden="true">&#128337;</div>
+          <div><div class="label">Time</div><div class="value" id="detail-time">4:00 PM</div></div>
+        </div>
+        <div class="detail-row">
+          <div class="ic" aria-hidden="true">&#128205;</div>
+          <div><div class="label">Where</div><div class="value" id="detail-venue">Nairobi Jaffery Sports Club</div></div>
+        </div>
+        <div class="detail-row">
+          <div class="ic" aria-hidden="true">&#128092;</div>
+          <div><div class="label">Dress code</div><div class="value" id="detail-dress">sporty / easy (ya kuseduce mabwana za watu)</div></div>
+        </div>
+      </div>
+
+      <div class="footer-note">
+        <div class="label">A few important instructions</div>
+        <ul>
+          <li>Show up.</li>
+          <li>Look pretty.</li>
+          <li>Bring yourself.</li>
+          <li>The rest is my problem. <span aria-hidden="true">&#128524;</span></li>
+        </ul>
+      </div>
+
+      <div class="location-cta">
+        <button class="btn-pill" id="btn-location" type="button">I KNOW WHERE I'M GOING <span aria-hidden="true">&#128205;</span></button>
+        <p class="location-confirm" id="location-confirm">opening the map&hellip;</p>
+      </div>
+    </div>
+  </section>
+
+</div>
+
+<script>
+(function(){
+  "use strict";
+
+  var CONFIG = {
+    name: "Late Night Whitney Houston",
+    date: "29 August 2026",
+    time: "4:00 PM",
+    venue: "Nairobi Jaffery Sports Club",
+    dressCode: "sporty / easy (ya kuseduce mabwana za watu)",
+    mapUrl: "https://maps.app.goo.gl/uBX7vsYXxf6QLox3A",
+    noMessages: [
+      "Surely? \uD83E\uDD7A",
+      "Pretty please? \uD83E\uDD79",
+      "Pinkie promise? \uD83E\uDD1E\uD83C\uDFFE",
+      "You don't actually mean that. \uD83D\uDE02",
+      "Think about the githeri. \uD83D\uDE0C",
+      "I'll even share my hoodie. \uD83E\uDD7A",
+      "Okay, now you're just being difficult. \uD83D\uDE2D",
+      "You're really going to make me chase you?",
+      "Pookie. \uD83D\uDE10",
+      "Be serious.",
+      "There is literally only one correct answer.",
+      "At this point, we're both wasting time. \uD83D\uDE02",
+      "Last chance.",
+      "...You know you want to. \u2764\uFE0F"
+    ]
+  };
+
+  document.getElementById("detail-date").textContent = CONFIG.date;
+  document.getElementById("detail-time").textContent = CONFIG.time;
+  document.getElementById("detail-venue").textContent = CONFIG.venue;
+  document.getElementById("detail-dress").textContent = CONFIG.dressCode;
+
+  var prefersReducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+  var STATES = ["proposal","celebrate","surprise","card","details"];
+  var screens = {};
+  STATES.forEach(function(s){ screens[s] = document.getElementById("screen-" + s); });
+
+  function goTo(state){
+    STATES.forEach(function(s){
+      screens[s].classList.toggle("active", s === state);
+    });
+    if(state === "details"){
+      screens.details.scrollTop = 0;
+    }
+  }
+
+  var btnNo = document.getElementById("btn-no");
+  var btnYes = document.getElementById("btn-yes");
+  var noIndex = 0;
+  var lastNoPosition = null;
+
+  function clamp(value, min, max){
+    return Math.min(Math.max(value, min), max);
+  }
+
+  function overlaps(a, b){
+    return !(a.right <= b.left || a.left >= b.right || a.bottom <= b.top || a.top >= b.bottom);
+  }
+
+  function distanceFromRect(a, b){
+    var dx = Math.max(b.left - a.right, a.left - b.right, 0);
+    var dy = Math.max(b.top - a.bottom, a.top - b.bottom, 0);
+    return Math.sqrt(dx * dx + dy * dy);
+  }
+
+  function scoreNoPosition(rect, protectedRects){
+    var distanceFromLast = lastNoPosition ? Math.hypot(rect.cx - lastNoPosition.x, rect.cy - lastNoPosition.y) : 0;
+    var nearestProtected = protectedRects.reduce(function(nearest, protectedRect){
+      return Math.min(nearest, distanceFromRect(rect, protectedRect));
+    }, Infinity);
+    return nearestProtected + distanceFromLast * 0.35;
+  }
+
+  function paddedRect(element, padding){
+    var rect = element.getBoundingClientRect();
+    return {
+      left: rect.left - padding,
+      top: rect.top - padding,
+      right: rect.right + padding,
+      bottom: rect.bottom + padding
+    };
+  }
+
+  function getProposalProtectedRects(){
+    var wordPadding = Math.max(14, Math.min(window.innerWidth, window.innerHeight) * 0.035);
+    var yesPadding = Math.max(30, Math.min(window.innerWidth, window.innerHeight) * 0.07);
+    var selectors = ["#track-label", ".recipient-header", ".proposal-title", ".proposal-sub"];
+    var rects = selectors.map(function(selector){
+      return paddedRect(document.querySelector(selector), wordPadding);
+    });
+    rects.push(paddedRect(btnYes, yesPadding));
+    return rects;
+  }
+
+  function overlapsAny(rect, protectedRects){
+    return protectedRects.some(function(protectedRect){
+      return overlaps(rect, protectedRect);
+    });
+  }
+
+  function makeNoCandidate(x, y, noRect){
+    return {
+      left: x - noRect.width / 2,
+      top: y - noRect.height / 2,
+      right: x + noRect.width / 2,
+      bottom: y + noRect.height / 2,
+      cx: x,
+      cy: y
+    };
+  }
+
+  function randomSafeNoPosition(preferBelowYes){
+    var proposalRect = screens.proposal.getBoundingClientRect();
+    var noRect = btnNo.getBoundingClientRect();
+    var yesRect = btnYes.getBoundingClientRect();
+    var protectedRects = getProposalProtectedRects();
+    var edgePadding = 16;
+    var belowYesGap = Math.max(42, Math.min(window.innerWidth, window.innerHeight) * 0.08);
+
+    var minX = Math.max(proposalRect.left + edgePadding + noRect.width / 2, edgePadding + noRect.width / 2);
+    var maxX = Math.min(proposalRect.right - edgePadding - noRect.width / 2, window.innerWidth - edgePadding - noRect.width / 2);
+    var minY = Math.max(proposalRect.top + edgePadding + noRect.height / 2, edgePadding + noRect.height / 2);
+    var maxY = Math.min(proposalRect.bottom - edgePadding - noRect.height / 2, window.innerHeight - edgePadding - noRect.height / 2);
+
+    if(maxX < minX){
+      minX = maxX = window.innerWidth / 2;
+    }
+    if(maxY < minY){
+      minY = maxY = window.innerHeight / 2;
+    }
+
+    if(preferBelowYes){
+      var belowYesX = yesRect.left + yesRect.width / 2;
+      var belowYesY = yesRect.bottom + belowYesGap + noRect.height / 2;
+      var belowCandidate = makeNoCandidate(clamp(belowYesX, minX, maxX), clamp(belowYesY, minY, maxY), noRect);
+      if(!overlapsAny(belowCandidate, protectedRects)){
+        lastNoPosition = { x: belowCandidate.cx, y: belowCandidate.cy };
+        return lastNoPosition;
+      }
+    }
+
+    var best = null;
+    var bestScore = -Infinity;
+
+    for(var attempt = 0; attempt < 140; attempt++){
+      var x = minX + Math.random() * (maxX - minX);
+      var y = minY + Math.random() * (maxY - minY);
+      var candidate = makeNoCandidate(x, y, noRect);
+      var score = scoreNoPosition(candidate, protectedRects);
+
+      if(!overlapsAny(candidate, protectedRects)){
+        lastNoPosition = { x: x, y: y };
+        return lastNoPosition;
+      }
+      if(score > bestScore){
+        bestScore = score;
+        best = candidate;
+      }
+    }
+
+    var fallbackX = best ? best.cx : minX;
+    var fallbackY = best ? best.cy : minY;
+
+    lastNoPosition = {
+      x: clamp(fallbackX, minX, maxX),
+      y: clamp(fallbackY, minY, maxY)
+    };
+    return lastNoPosition;
+  }
+
+  function dodge(){
+    btnNo.textContent = CONFIG.noMessages[noIndex % CONFIG.noMessages.length];
+    noIndex++;
+
+    placeNoButton();
+  }
+
+  function placeNoButton(preferBelowYes){
+    var pos = randomSafeNoPosition(preferBelowYes);
+    btnNo.style.setProperty("--no-left", pos.x + "px");
+    btnNo.style.setProperty("--no-top", pos.y + "px");
+    void btnNo.offsetWidth;
+    pos = randomSafeNoPosition(preferBelowYes);
+    btnNo.style.setProperty("--no-left", pos.x + "px");
+    btnNo.style.setProperty("--no-top", pos.y + "px");
+  }
+
+  window.addEventListener("resize", function(){
+    if(screens.proposal.classList.contains("active")){
+      placeNoButton();
+    }
+  });
+  requestAnimationFrame(function(){
+    placeNoButton(true);
+  });
+
+  btnNo.addEventListener("mouseenter", dodge);
+
+  btnNo.addEventListener("touchstart", function(e){
+    e.preventDefault();
+    dodge();
+  }, { passive:false });
+
+  btnNo.addEventListener("focus", dodge);
+
+  btnNo.addEventListener("click", function(e){
+    e.preventDefault();
+    dodge();
+  });
+
+  btnYes.addEventListener("click", function(){
+    burstConfetti();
+    goTo("celebrate");
+  });
+
+  var canvas = document.getElementById("confetti");
+  var ctx = canvas.getContext("2d");
+  var confettiPieces = [];
+  var confettiRunning = false;
+  var colors = ["#edaa4a", "#f6c56d", "#f6c9d2", "#faf1e2", "#d9a6b3"];
+
+  function resizeCanvas(){
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
+  }
+  window.addEventListener("resize", resizeCanvas);
+  resizeCanvas();
+
+  function burstConfetti(){
+    if(prefersReducedMotion) return;
+    var count = 90;
+    for(var i=0;i<count;i++){
+      confettiPieces.push({
+        x: canvas.width/2 + (Math.random()-0.5) * 60,
+        y: canvas.height * 0.25,
+        vx: (Math.random()-0.5) * 9,
+        vy: -Math.random()*7 - 3,
+        size: Math.random()*7 + 4,
+        color: colors[Math.floor(Math.random()*colors.length)],
+        rot: Math.random()*Math.PI*2,
+        vr: (Math.random()-0.5)*0.3,
+        life: 0,
+        maxLife: 130 + Math.random()*40
+      });
+    }
+    if(!confettiRunning){
+      confettiRunning = true;
+      requestAnimationFrame(tickConfetti);
+    }
+  }
+
+  function tickConfetti(){
+    ctx.clearRect(0,0,canvas.width,canvas.height);
+    var gravity = 0.16;
+    confettiPieces = confettiPieces.filter(function(p){ return p.life < p.maxLife; });
+
+    confettiPieces.forEach(function(p){
+      p.vy += gravity;
+      p.x += p.vx;
+      p.y += p.vy;
+      p.rot += p.vr;
+      p.life++;
+
+      var alpha = 1 - Math.max(0, (p.life - p.maxLife*0.7) / (p.maxLife*0.3));
+      ctx.save();
+      ctx.globalAlpha = Math.max(alpha, 0);
+      ctx.translate(p.x, p.y);
+      ctx.rotate(p.rot);
+      ctx.fillStyle = p.color;
+      ctx.fillRect(-p.size/2, -p.size/2, p.size, p.size*0.6);
+      ctx.restore();
+    });
+
+    if(confettiPieces.length > 0){
+      requestAnimationFrame(tickConfetti);
+    } else {
+      confettiRunning = false;
+      ctx.clearRect(0,0,canvas.width,canvas.height);
+    }
+  }
+
+  document.getElementById("btn-to-surprise").addEventListener("click", function(){
+    goTo("surprise");
+  });
+
+  document.getElementById("btn-open-surprise").addEventListener("click", function(){
+    goTo("card");
+  });
+
+  var envelope = document.getElementById("envelope");
+  var cardPanel = document.getElementById("card-panel");
+  var envelopeWrap = document.getElementById("envelope-wrap");
+
+  envelope.addEventListener("click", function(){
+    envelope.classList.add("open");
+    setTimeout(function(){
+      envelopeWrap.style.display = "none";
+      cardPanel.style.display = "flex";
+      requestAnimationFrame(function(){
+        requestAnimationFrame(function(){
+          cardPanel.classList.add("shown");
+        });
+      });
+    }, 480);
+  });
+
+  document.getElementById("btn-continue").addEventListener("click", function(){
+    goTo("details");
+  });
+
+  var continueBlock = document.getElementById("continue-block");
+  if("IntersectionObserver" in window){
+    var io = new IntersectionObserver(function(entries){
+      entries.forEach(function(entry){
+        if(entry.isIntersecting){ continueBlock.classList.add("visible"); }
+      });
+    }, { root: document.getElementById("card-scroll"), threshold: 0.4 });
+    io.observe(continueBlock);
+  } else {
+    continueBlock.classList.add("visible");
+  }
+
+  document.getElementById("btn-location").addEventListener("click", function(){
+    window.open(CONFIG.mapUrl, "_blank", "noopener");
+    var confirmEl = document.getElementById("location-confirm");
+    confirmEl.classList.add("visible");
+  });
+
+})();
+</script>
+
+</body>
+</html>
